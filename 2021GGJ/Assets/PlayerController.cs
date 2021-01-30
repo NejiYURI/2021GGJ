@@ -108,7 +108,7 @@ public class PlayerController : MonoBehaviour
             this.Score = 100;
         }
         if (this.ScoreText != null)
-            this.ScoreText.text = this.Score.ToString();
+            this.ScoreText.text = this.Score.ToString("f1");
 
         StartCoroutine(ScoreAddIEnum());
     }
