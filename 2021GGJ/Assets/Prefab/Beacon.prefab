@@ -99,7 +99,7 @@ CircleCollider2D:
   m_UsedByComposite: 0
   m_Offset: {x: 0, y: 0}
   serializedVersion: 2
-  m_Radius: 3
+  m_Radius: 6.6
 --- !u!114 &2810112934163932363
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -114,10 +114,13 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   ScoreDisList:
   - Distance: 100
-    Score: 1
+    Score: 0
+  - Distance: 75
+    Score: 0.1
   - Distance: 50
-    Score: 3
-  - Distance: 20
-    Score: 5
+    Score: 0.3
+  - Distance: 25
+    Score: 0.5
+  spriteRenderer: {fileID: 2810112934163932361}
   IsActive: 0
   ScoreAdd: 3
