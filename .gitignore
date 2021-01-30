@@ -62,3 +62,4 @@ crashlytics-build.properties
 2021GGJ/Library/APIUpdater/project-dependencies.graph
 2021GGJ/Library/ArtifactDB
 2021GGJ/Library/ArtifactDB-lock
+*.log
