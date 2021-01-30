@@ -40,11 +40,12 @@ public class PlayerController : MonoBehaviour
 
     public float DashAttackRange;
 
+    private Vector2 DashDir;
+
     void DashAttackFunc()
     {
         //取得攻擊範圍內打到多少物件
         Collider2D[] TargetHit = Physics2D.OverlapCircleAll(this.transform.position, this.DashAttackRange);
-
         //一一篩選物件
         foreach (Collider2D item in TargetHit)
         {
@@ -54,14 +55,14 @@ public class PlayerController : MonoBehaviour
                 PlayerController targetController = item.gameObject.GetComponent<PlayerController>();
                 if (targetController != null && targetController.CheckState() != 3)
                 {
-                    Debug.Log("Dash Hit " + item.gameObject.tag);
+                   
                     PlayerMovement m_Player = this.gameObject.GetComponent<PlayerMovement>();
-                    
-                    GameManager.gameManager.TriggerPlayerHit(item.tag, m_Player.GetVelocity());
-                    //m_Player.SetVelocity(Vector2.zero);
+                    Debug.Log("Dash Hit " + this.DashDir);
+                    GameManager.gameManager.TriggerPlayerHit(item.tag, this.DashDir);
+                    m_Player.SetVelocity(Vector2.zero);
+                    m_Player.stopPos();
                 }
             }
-
         }
     }
 
@@ -70,6 +71,7 @@ public class PlayerController : MonoBehaviour
         //將功能加入訂閱(進入、離開訊號發送點)
         GameManager.gameManager.OnTriggerBeaconIn += BeaconIn;
         GameManager.gameManager.OnTriggerBeaconExit += BeaconExit;
+        GameManager.gameManager.OnTriggerGetScore += SetScore;
         this.Score = 0;
         this.ScoreAdd = -1;
         //開始跑分數計算器
@@ -100,10 +102,11 @@ public class PlayerController : MonoBehaviour
         return (int)state;
     }
 
-    public void PlayerDash()
+    public void PlayerDash(Vector2 dir)
     {
         this.state = PlayerState.Dashing;
         this.DashCounter = DashCoolDown;
+        this.DashDir = dir;
         StartCoroutine(DashCooldownIEum());
         StartCoroutine(DashStateEndIEum());
     }
@@ -152,6 +155,11 @@ public class PlayerController : MonoBehaviour
         }
     }
 
+    private void SetScore()
+    {
+        GameManager.gameManager.UploadScore(this.tag,this.Score);
+    }
+
     /// <summary>
     /// 分數計算器，依設定頻率增加或減少玩家的分數
     /// </summary>
@@ -167,6 +175,7 @@ public class PlayerController : MonoBehaviour
         if (this.Score >= 100)
         {
             this.Score = 100;
+            GameManager.gameManager.PlayerWin(this.tag);
         }
         if (this.ScoreText != null)
             this.ScoreText.text = this.Score.ToString("f1");
@@ -201,7 +210,7 @@ public class PlayerController : MonoBehaviour
         yield return new WaitForSeconds(0.1f);
         Counter += 0.1f;
 
-        if (Counter < 0.5f)
+        if (Counter < 1f)
         {
             StartCoroutine(GetHitRecover(Counter));
         }

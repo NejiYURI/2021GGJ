@@ -32,6 +32,8 @@ public class PlayerMovement : MonoBehaviour
     /// </summary>
     public float MoveSpeed;
 
+    public float SpeedPara;
+
     /// <summary>
     /// 碰撞器
     /// </summary>
@@ -53,6 +55,7 @@ public class PlayerMovement : MonoBehaviour
     private void Start()
     {
         GameManager.gameManager.OnTriggerPlayerHit += GetAttack;
+        this.SpeedPara = 1;
     }
 
     private void GetAttack(string PlayerTag, Vector2 PushDir)
@@ -61,7 +64,8 @@ public class PlayerMovement : MonoBehaviour
         if (PlayerTag == this.playerController.tag)
         {
             this.playerController.SetDrifting();
-            this.rb.velocity = (PushDir * 1.2f);
+            //this.rb.velocity = (PushDir * 1.2f);
+            this.rb.AddForce(PushDir * 100f);
             if (this.playerAudio != null)
             {
                 this.playerAudio.PlayDamageAudio();
@@ -75,11 +79,12 @@ public class PlayerMovement : MonoBehaviour
         //移動參數比照使用者輸入的內容
         movement.x = Input.GetAxis(InputHorizontal);
         movement.y = Input.GetAxis(InputVertical);
-        if (Input.GetAxisRaw(InputDash) != 0 && playerController.CheckCanDash())
+        if (Input.GetAxisRaw(InputDash) != 0 && playerController.CheckCanDash() && movement!=Vector2.zero)
         {
             Debug.Log("Dash");
-            playerController.PlayerDash();
-            this.rb.AddForce(this.movement * 300f);
+            playerController.PlayerDash(this.rb.velocity);
+            StartCoroutine(DashingIEum());
+            //this.rb.AddForce(this.movement * 300f);
             if (this.playerAudio != null)
             {
                 this.playerAudio.PlayDashAudio();
@@ -97,12 +102,17 @@ public class PlayerMovement : MonoBehaviour
         this.rb.velocity = Dir;
     }
 
+    public void stopPos()
+    {
+        this.rb.position = this.rb.position;
+    }
+
     private void FixedUpdate()
     {
-        if (playerController.CheckState() != 0) return;
+        if (playerController.CheckState() == 3) return;
 
         //依照移動參數*速度決定移動
-        this.rb.velocity = this.movement * MoveSpeed * Time.deltaTime;
+        this.rb.velocity = this.movement * MoveSpeed * SpeedPara * Time.deltaTime;
         if (this.playerAudio != null)
         {
             if (this.movement != Vector2.zero)
@@ -124,5 +134,12 @@ public class PlayerMovement : MonoBehaviour
         {
             this.PlayerImage.flipX = false;
         }
+    }
+
+    IEnumerator DashingIEum()
+    {
+        this.SpeedPara = 5f;
+        yield return new WaitForSeconds(0.1f);
+        this.SpeedPara = 1f;
     }
 }

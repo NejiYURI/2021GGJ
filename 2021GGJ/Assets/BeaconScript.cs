@@ -18,9 +18,9 @@ public class BeaconScript : MonoBehaviour
     /// 碰撞collider
     /// </summary>
     private CircleCollider2D thiscol;
-
+    [SerializeField]
     private int LifeTime;
-
+    [SerializeField]
     private int LifeTimeCounter;
 
     public SpriteRenderer spriteRenderer;
@@ -32,13 +32,17 @@ public class BeaconScript : MonoBehaviour
 
     private List<InFieldData> PlayerInfieldList;
 
+    private void Awake()
+    {
+
+        this.thiscol = this.gameObject.GetComponent<CircleCollider2D>();
+    }
     private void Start()
     {
-        this.thiscol = this.gameObject.GetComponent<CircleCollider2D>();
         this.LifeTime = 0;
         this.IsActive = true;
         this.PlayerInfieldList = new List<InFieldData>();
-        SetBeacon(new Vector2(Random.Range(-9, 9), Random.Range(-5, 5)), 5);
+       // SetBeacon(new Vector2(Random.Range(-9, 9), Random.Range(-5, 5)), 5);
     }
     /// <summary>
     /// 此訊號增加分數量
@@ -115,13 +119,14 @@ public class BeaconScript : MonoBehaviour
         }
     }
 
-    public void SetBeacon(Vector2 Pos, /*List<BeaconScore> ScoreSet,*/ int LifeTime)
+    public void SetBeacon(Vector2 Pos, List<BeaconScore> ScoreSet, int LifeTime)
     {
         this.transform.position = Pos;
-        //this.ScoreDisList = ScoreSet;
+        this.ScoreDisList = ScoreSet;
         this.LifeTime = LifeTime;
         this.LifeTimeCounter = 0;
         this.IsActive = true;
+        this.thiscol.radius = Random.Range(2,6);
         StartCoroutine(ScoreAddIEnum());
     }
 
@@ -133,6 +138,7 @@ public class BeaconScript : MonoBehaviour
         {
             this.IsActive = false;
             this.spriteRenderer.color = new Color(this.spriteRenderer.color.r, this.spriteRenderer.color.g, this.spriteRenderer.color.b,0);
+            GameManager.gameManager.TriggerBeaconReposition();
             //SetBeacon(new Vector2(Random.Range(-9, 9), Random.Range(-5, 5)), 5);
         }
         else
