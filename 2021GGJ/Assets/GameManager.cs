@@ -19,17 +19,18 @@ public class GameManager : MonoBehaviour
     /// <summary>
     /// 訂閱事件:玩家進入訊號範圍
     /// </summary>
-    public event Action<string,int> OnTriggerBeaconIn;
+    public event Action<Model_BeaconTrigger> OnTriggerBeaconIn;
     /// <summary>
     /// 訂閱事件觸發:玩家進入訊號範圍
     /// </summary>
     /// <param name="PlayerTag">玩家標籤</param>
     /// <param name="AddScore">欲增加分數</param>
-    public void TriggerBeaconIn(string PlayerTag,int AddScore)
+    /// <param name="DisPer">訊號與玩家距離(百分比)</param>
+    public void TriggerBeaconIn(Model_BeaconTrigger InputModel)
     {
         if (OnTriggerBeaconIn != null)
         {
-            OnTriggerBeaconIn(PlayerTag, AddScore);
+            OnTriggerBeaconIn(InputModel);
         }
     }
 

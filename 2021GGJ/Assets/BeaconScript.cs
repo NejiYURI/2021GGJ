@@ -34,7 +34,7 @@ public class BeaconScript : MonoBehaviour
     /// 此訊號增加分數量
     /// </summary>
     [SerializeField]
-    private int ScoreAdd;
+    private float ScoreAdd;
 
     private void OnTriggerStay2D(Collider2D collision)
     {
@@ -45,10 +45,11 @@ public class BeaconScript : MonoBehaviour
             {
 
                 float dis = Vector2.Distance(this.transform.position, collision.transform.position);
+                float dis_per = (dis / this.thiscol.radius) * 100;
                 Debug.Log(collision.tag + " In!! dis:" + dis);
                 foreach (var item in this.ScoreDisList)
                 {
-                    if (((dis / this.thiscol.radius) * 100) <= item.Distance)
+                    if (dis_per <= item.Distance)
                     {
                         ScoreAdd = item.Score;
                     }
@@ -58,7 +59,7 @@ public class BeaconScript : MonoBehaviour
                     }
                 }
                 //觸發訂閱事件
-                GameManager.gameManager.TriggerBeaconIn(collision.tag, ScoreAdd);
+                GameManager.gameManager.TriggerBeaconIn(new Model_BeaconTrigger(collision.tag,ScoreAdd, dis_per));
             }
         }
 

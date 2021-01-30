@@ -8,17 +8,22 @@ public class PlayerController : MonoBehaviour
     /// <summary>
     /// 產だ计
     /// </summary>
-    private int Score;
+    private float Score;
 
     /// <summary>
     /// だ计–(?)糤把计
     /// </summary>
-    private int ScoreAdd;
+    private float ScoreAdd;
 
     /// <summary>
     /// 陪ボゅ(蠢传)
     /// </summary>
     public Text ScoreText;
+
+
+    public SpriteRenderer SignalIcon;
+
+    public List<Model_Signal> SignalSpriteList;
 
     private void OnTriggerStay2D(Collider2D collision)
     {
@@ -38,11 +43,12 @@ public class PlayerController : MonoBehaviour
         this.ScoreAdd = -1;
         //秨﹍禲だ计璸衡竟
         StartCoroutine(ScoreAddIEnum());
+        this.SignalIcon.enabled = false;
     }
 
     private void Update()
     {
-        
+
 
 
     }
@@ -52,12 +58,23 @@ public class PlayerController : MonoBehaviour
     /// </summary>
     /// <param name="Tag"></param>
     /// <param name="Num"></param>
-    private void BeaconIn(string Tag, int Num)
+    private void BeaconIn(Model_BeaconTrigger _BeaconTrigger)
     {
-        if (Tag.Equals(this.tag))
+        if (_BeaconTrigger.PlayerTag.Equals(this.tag))
         {
-           
-            this.ScoreAdd = Num;
+            this.SignalIcon.enabled = true;
+            foreach (var item in this.SignalSpriteList)
+            {
+                if (_BeaconTrigger.Distance_Percentage <= item.Distance)
+                {
+                    this.SignalIcon.sprite = item.SignalIcon;
+                }
+                else
+                {
+                    break;
+                }
+            }
+            this.ScoreAdd = _BeaconTrigger.AddScore;
         }
     }
 
@@ -70,6 +87,7 @@ public class PlayerController : MonoBehaviour
         if (Tag.Equals(this.tag))
         {
             this.ScoreAdd = -1;
+            this.SignalIcon.enabled = false;
         }
     }
 
@@ -79,7 +97,7 @@ public class PlayerController : MonoBehaviour
     /// <returns></returns>
     IEnumerator ScoreAddIEnum()
     {
-        yield return new WaitForSeconds(0.5f);
+        yield return new WaitForSeconds(0.1f);
         this.Score += this.ScoreAdd;
         if (this.Score <= 0)
         {
@@ -89,7 +107,8 @@ public class PlayerController : MonoBehaviour
         {
             this.Score = 100;
         }
-        this.ScoreText.text = this.Score.ToString();
+        if (this.ScoreText != null)
+            this.ScoreText.text = this.Score.ToString();
 
         StartCoroutine(ScoreAddIEnum());
     }

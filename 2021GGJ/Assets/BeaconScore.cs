@@ -13,6 +13,6 @@ public class BeaconScore
     public float Distance;
 
     [SerializeField]
-    public int Score;
+    public float Score;
 }
 
