@@ -49,4 +49,13 @@ public class GameManager : MonoBehaviour
             OnTriggerBeaconExit(PlayerTag);
         }
     }
+
+    public event Action<string> OnTriggerPlayerHit;
+    public void TriggerPlayerHit(string PlayerTag)
+    {
+        if (OnTriggerPlayerHit != null)
+        {
+            OnTriggerPlayerHit(PlayerTag);
+        }
+    }
 }

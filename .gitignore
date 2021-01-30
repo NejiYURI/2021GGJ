@@ -2,13 +2,13 @@
 #
 # Get latest from https://github.com/github/gitignore/blob/master/Unity.gitignore
 #
-2021GGJ/Library
-2021GGJ/[Tt]emp
-2021GGJ/[Oo]bj
-2021GGJ/[Bb]uild
-2021GGJ/[Bb]uilds
-2021GGJ/[Ll]ogs
-2021GGJ/[Mm]emoryCaptures
+2021GGJ/Library/
+2021GGJ/[Tt]emp/
+2021GGJ/[Oo]bj/
+2021GGJ/[Bb]uild/
+2021GGJ/[Bb]uilds/
+2021GGJ/[Ll]ogs/
+2021GGJ/[Mm]emoryCaptures/
 
 # Never ignore Asset meta data
 !/[Aa]ssets/**/*.meta
@@ -57,3 +57,8 @@ sysinfo.txt
 
 # Crashlytics generated file
 crashlytics-build.properties
+2021GGJ/Library/AnnotationManager
+2021GGJ/Library/AnnotationManager
+2021GGJ/Library/APIUpdater/project-dependencies.graph
+2021GGJ/Library/ArtifactDB
+2021GGJ/Library/ArtifactDB-lock

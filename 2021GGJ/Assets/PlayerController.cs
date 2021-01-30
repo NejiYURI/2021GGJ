@@ -20,16 +20,44 @@ public class PlayerController : MonoBehaviour
     /// </summary>
     public Text ScoreText;
 
+    public enum PlayerState
+    {
+        Normal,
+        Dashing,
+        Drifting
+    }
+
+    [SerializeField]
+    private PlayerState state;
 
     public SpriteRenderer SignalIcon;
 
     public List<Model_Signal> SignalSpriteList;
 
-    private void OnTriggerStay2D(Collider2D collision)
-    {
+    private float DashCounter;
 
-        if (collision.gameObject.tag == "Beacon")
+    public float DashCoolDown;
+
+    public float DashAttackRange;
+
+
+
+
+    void DashAttackFunc()
+    {
+        //取得攻擊範圍內打到多少物件
+        Collider2D[] TargetHit = Physics2D.OverlapCircleAll(this.transform.position, this.DashAttackRange);
+
+        //一一篩選物件
+        foreach (Collider2D item in TargetHit)
         {
+            if (item.gameObject.layer == 6)
+            {
+                PlayerController targetController = item.gameObject.GetComponent<PlayerController>();
+                if (targetController != null && targetController.CheckState() == 0)
+                {
+                }
+            }
 
         }
     }
@@ -44,13 +72,36 @@ public class PlayerController : MonoBehaviour
         //開始跑分數計算器
         StartCoroutine(ScoreAddIEnum());
         this.SignalIcon.enabled = false;
+        this.state = PlayerState.Normal;
     }
 
     private void Update()
     {
 
+        if (this.state == PlayerState.Dashing)
+            DashAttackFunc();
 
+    }
 
+    public bool CheckCanDash()
+    {
+        Debug.Log(DashCounter);
+        if (DashCounter > 0 || state != PlayerState.Normal)
+            return false;
+
+        return true;
+    }
+
+    public int CheckState()
+    {
+        return (int)state;
+    }
+
+    public void PlayerDash()
+    {
+        this.state = PlayerState.Dashing;
+        this.DashCounter = DashCoolDown;
+        StartCoroutine(DashCooldownIEum());
     }
 
     /// <summary>
@@ -86,7 +137,7 @@ public class PlayerController : MonoBehaviour
     {
         if (Tag.Equals(this.tag))
         {
-            this.ScoreAdd = -1;
+            this.ScoreAdd = -0.1f;
             this.SignalIcon.enabled = false;
         }
     }
@@ -111,6 +162,34 @@ public class PlayerController : MonoBehaviour
             this.ScoreText.text = this.Score.ToString("f1");
 
         StartCoroutine(ScoreAddIEnum());
+    }
+
+    /// <summary>
+    /// 計算衝刺冷卻時間
+    /// </summary>
+    /// <returns></returns>
+    IEnumerator DashCooldownIEum()
+    {
+        yield return new WaitForSeconds(0.1f);
+        DashCounter -= 0.1f;
+
+        if (DashCounter > 0)
+        {
+            StartCoroutine(DashCooldownIEum());
+        }
+        if (this.state == PlayerState.Dashing)
+            this.state = PlayerState.Normal;
+    }
+
+    /// <summary>
+    /// 輔助顯示攻擊範圍使用
+    /// </summary>
+    private void OnDrawGizmosSelected()
+    {
+        if (this.transform != null)
+        {
+            Gizmos.DrawWireSphere(this.transform.position, this.DashAttackRange);
+        }
     }
 
 }

@@ -79,7 +79,7 @@ public class BeaconScript : MonoBehaviour
                 {
                     this.PlayerInfieldList.Where(x => x.PlayerTag == collision.tag).First().Dis = dis_per;
                 }
-                Debug.Log(collision.tag + " In!! dis:" + dis_per);
+                //Debug.Log(collision.tag + " In!! dis:" + dis_per);
                 foreach (var item in this.ScoreDisList)
                 {
                     if (dis_per <= item.Distance)
@@ -105,7 +105,7 @@ public class BeaconScript : MonoBehaviour
             //檢查碰撞物件層級是否為編號6(玩家Layer)
             if (collision.gameObject.layer == 6)
             {
-                Debug.Log(collision.tag + " Exit!!");
+                //Debug.Log(collision.tag + " Exit!!");
                 this.PlayerInfieldList.RemoveAll(x => x.PlayerTag.Equals(collision.tag));
                 //觸發訂閱事件
                 GameManager.gameManager.TriggerBeaconExit(collision.tag);

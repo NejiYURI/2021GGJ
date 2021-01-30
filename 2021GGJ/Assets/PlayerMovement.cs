@@ -18,6 +18,11 @@ public class PlayerMovement : MonoBehaviour
     public string InputVertical;
 
     /// <summary>
+    /// 使用的Input名稱(衝刺按鈕)
+    /// </summary>
+    public string InputDash;
+
+    /// <summary>
     /// 移動參數
     /// </summary>
     private Vector2 movement;
@@ -32,23 +37,34 @@ public class PlayerMovement : MonoBehaviour
     /// </summary>
     private Rigidbody2D rb;
 
+    private PlayerController playerController;
+
     private void Awake()
     {
         //取得此物件的碰撞器
         this.rb = this.gameObject.GetComponent<Rigidbody2D>();
+        this.playerController = this.gameObject.GetComponent<PlayerController>();
     }
 
- 
+
     void Update()
     {
         //移動參數比照使用者輸入的內容
         movement.x = Input.GetAxis(InputHorizontal);
         movement.y = Input.GetAxis(InputVertical);
+        if (Input.GetAxisRaw(InputDash)!= 0 && playerController.CheckCanDash())
+        {
+            Debug.Log("Dash");
+            playerController.PlayerDash();
+            this.rb.AddForce(this.movement * MoveSpeed*1.5f);
+        }
     }
 
     private void FixedUpdate()
     {
+        if (playerController.CheckState() != 0) return;
+  
         //依照移動參數*速度決定移動
-        this.rb.MovePosition(this.rb.position+this.movement*MoveSpeed*Time.deltaTime);
+        this.rb.velocity= this.movement * MoveSpeed * Time.deltaTime;
     }
 }
