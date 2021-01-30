@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
+using Random = UnityEngine.Random;
 
 public class BeaconScript : MonoBehaviour
 {
@@ -37,6 +38,7 @@ public class BeaconScript : MonoBehaviour
         this.LifeTime = 0;
         this.IsActive = true;
         this.PlayerInfieldList = new List<InFieldData>();
+        SetBeacon(new Vector2(Random.Range(-9, 9), Random.Range(-5, 5)), 5);
     }
     /// <summary>
     /// 此訊號增加分數量
@@ -113,10 +115,10 @@ public class BeaconScript : MonoBehaviour
         }
     }
 
-    public void SetBeacon(Vector2 Pos, List<BeaconScore> ScoreSet, int LifeTime)
+    public void SetBeacon(Vector2 Pos, /*List<BeaconScore> ScoreSet,*/ int LifeTime)
     {
         this.transform.position = Pos;
-        this.ScoreDisList = ScoreSet;
+        //this.ScoreDisList = ScoreSet;
         this.LifeTime = LifeTime;
         this.LifeTimeCounter = 0;
         this.IsActive = true;
@@ -130,6 +132,7 @@ public class BeaconScript : MonoBehaviour
         if (this.LifeTimeCounter >= this.LifeTime)
         {
             this.IsActive = false;
+            SetBeacon(new Vector2(Random.Range(-9, 9), Random.Range(-5, 5)), 5);
         }
         else
         {
