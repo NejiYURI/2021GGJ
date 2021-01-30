@@ -16,6 +16,11 @@ public class GameManager : MonoBehaviour
         gameManager = this;
     }
 
+
+    public List<Transform> BeaconPositionList;
+
+    public BeaconScript beacon;
+
     /// <summary>
     /// 訂閱事件:玩家進入訊號範圍
     /// </summary>
@@ -56,6 +61,15 @@ public class GameManager : MonoBehaviour
         if (OnTriggerPlayerHit != null)
         {
             OnTriggerPlayerHit(PlayerTag, Dir);
+        }
+    }
+
+    public event Action OnTriggerBeaconReposition;
+    public void TriggerBeaconReposition()
+    {
+        if (OnTriggerBeaconReposition != null)
+        {
+            OnTriggerBeaconReposition();
         }
     }
 }

@@ -39,11 +39,16 @@ public class PlayerMovement : MonoBehaviour
 
     private PlayerController playerController;
 
+    public SpriteRenderer PlayerImage;
+
+    private PlayerAudioController playerAudio;
+
     private void Awake()
     {
         //取得此物件的碰撞器
         this.rb = this.gameObject.GetComponent<Rigidbody2D>();
         this.playerController = this.gameObject.GetComponent<PlayerController>();
+        this.playerAudio = this.gameObject.GetComponent<PlayerAudioController>();
     }
     private void Start()
     {
@@ -56,7 +61,11 @@ public class PlayerMovement : MonoBehaviour
         if (PlayerTag == this.playerController.tag)
         {
             this.playerController.SetDrifting();
-            this.rb.velocity=(PushDir*1.2f);
+            this.rb.velocity = (PushDir * 1.2f);
+            if (this.playerAudio != null)
+            {
+                this.playerAudio.PlayDamageAudio();
+            }
         }
     }
 
@@ -70,7 +79,11 @@ public class PlayerMovement : MonoBehaviour
         {
             Debug.Log("Dash");
             playerController.PlayerDash();
-            this.rb.AddForce(this.movement * MoveSpeed * 1.5f);
+            this.rb.AddForce(this.movement * 300f);
+            if (this.playerAudio != null)
+            {
+                this.playerAudio.PlayDashAudio();
+            }
         }
     }
 
@@ -79,11 +92,37 @@ public class PlayerMovement : MonoBehaviour
         return this.rb.velocity;
     }
 
+    public void SetVelocity(Vector2 Dir)
+    {
+        this.rb.velocity = Dir;
+    }
+
     private void FixedUpdate()
     {
         if (playerController.CheckState() != 0) return;
 
         //依照移動參數*速度決定移動
         this.rb.velocity = this.movement * MoveSpeed * Time.deltaTime;
+        if (this.playerAudio != null)
+        {
+            if (this.movement != Vector2.zero)
+            {
+                playerAudio.PlayRunAudio();
+            }
+            else
+            {
+                playerAudio.StopRunAudio();
+            }
+        }
+
+
+        if (this.movement.x > 0)
+        {
+            this.PlayerImage.flipX = true;
+        }
+        else if (this.movement.x < 0)
+        {
+            this.PlayerImage.flipX = false;
+        }
     }
 }

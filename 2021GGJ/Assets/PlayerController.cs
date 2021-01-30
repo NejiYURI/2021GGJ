@@ -40,9 +40,6 @@ public class PlayerController : MonoBehaviour
 
     public float DashAttackRange;
 
-
-
-
     void DashAttackFunc()
     {
         //取得攻擊範圍內打到多少物件
@@ -59,7 +56,9 @@ public class PlayerController : MonoBehaviour
                 {
                     Debug.Log("Dash Hit " + item.gameObject.tag);
                     PlayerMovement m_Player = this.gameObject.GetComponent<PlayerMovement>();
+                    
                     GameManager.gameManager.TriggerPlayerHit(item.tag, m_Player.GetVelocity());
+                    //m_Player.SetVelocity(Vector2.zero);
                 }
             }
 
@@ -192,7 +191,7 @@ public class PlayerController : MonoBehaviour
 
     IEnumerator DashStateEndIEum()
     {
-        yield return new WaitForSeconds(0.5f);
+        yield return new WaitForSeconds(0.2f);
         if (this.state == PlayerState.Dashing)
             this.state = PlayerState.Normal;
     }
@@ -202,7 +201,7 @@ public class PlayerController : MonoBehaviour
         yield return new WaitForSeconds(0.1f);
         Counter += 0.1f;
 
-        if (Counter < 2)
+        if (Counter < 0.5f)
         {
             StartCoroutine(GetHitRecover(Counter));
         }

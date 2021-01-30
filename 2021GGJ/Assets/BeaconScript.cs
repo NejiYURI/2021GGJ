@@ -132,7 +132,8 @@ public class BeaconScript : MonoBehaviour
         if (this.LifeTimeCounter >= this.LifeTime)
         {
             this.IsActive = false;
-            SetBeacon(new Vector2(Random.Range(-9, 9), Random.Range(-5, 5)), 5);
+            this.spriteRenderer.color = new Color(this.spriteRenderer.color.r, this.spriteRenderer.color.g, this.spriteRenderer.color.b,0);
+            //SetBeacon(new Vector2(Random.Range(-9, 9), Random.Range(-5, 5)), 5);
         }
         else
         {
