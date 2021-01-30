@@ -50,12 +50,12 @@ public class GameManager : MonoBehaviour
         }
     }
 
-    public event Action<string> OnTriggerPlayerHit;
-    public void TriggerPlayerHit(string PlayerTag)
+    public event Action<string, Vector2> OnTriggerPlayerHit;
+    public void TriggerPlayerHit(string PlayerTag, Vector2 Dir)
     {
         if (OnTriggerPlayerHit != null)
         {
-            OnTriggerPlayerHit(PlayerTag);
+            OnTriggerPlayerHit(PlayerTag, Dir);
         }
     }
 }

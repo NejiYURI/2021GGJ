@@ -51,11 +51,15 @@ public class PlayerController : MonoBehaviour
         //一一篩選物件
         foreach (Collider2D item in TargetHit)
         {
-            if (item.gameObject.layer == 6)
+            if (item.gameObject.layer == 6 && item.gameObject.tag != this.tag)
             {
+               
                 PlayerController targetController = item.gameObject.GetComponent<PlayerController>();
-                if (targetController != null && targetController.CheckState() == 0)
+                if (targetController != null && targetController.CheckState() != 3)
                 {
+                    Debug.Log("Dash Hit " + item.gameObject.tag);
+                    PlayerMovement m_Player = this.gameObject.GetComponent<PlayerMovement>();
+                    GameManager.gameManager.TriggerPlayerHit(item.tag, m_Player.GetVelocity());
                 }
             }
 
@@ -85,7 +89,7 @@ public class PlayerController : MonoBehaviour
 
     public bool CheckCanDash()
     {
-        Debug.Log(DashCounter);
+        //Debug.Log(DashCounter);
         if (DashCounter > 0 || state != PlayerState.Normal)
             return false;
 
@@ -102,6 +106,13 @@ public class PlayerController : MonoBehaviour
         this.state = PlayerState.Dashing;
         this.DashCounter = DashCoolDown;
         StartCoroutine(DashCooldownIEum());
+        StartCoroutine(DashStateEndIEum());
+    }
+
+    public void SetDrifting()
+    {
+        this.state = PlayerState.Drifting;
+        StartCoroutine(GetHitRecover(0));
     }
 
     /// <summary>
@@ -177,8 +188,28 @@ public class PlayerController : MonoBehaviour
         {
             StartCoroutine(DashCooldownIEum());
         }
+    }
+
+    IEnumerator DashStateEndIEum()
+    {
+        yield return new WaitForSeconds(0.5f);
         if (this.state == PlayerState.Dashing)
             this.state = PlayerState.Normal;
+    }
+
+    IEnumerator GetHitRecover(float Counter)
+    {
+        yield return new WaitForSeconds(0.1f);
+        Counter += 0.1f;
+
+        if (Counter < 2)
+        {
+            StartCoroutine(GetHitRecover(Counter));
+        }
+        else
+        {
+            this.state = PlayerState.Normal;
+        }
     }
 
     /// <summary>

@@ -45,6 +45,20 @@ public class PlayerMovement : MonoBehaviour
         this.rb = this.gameObject.GetComponent<Rigidbody2D>();
         this.playerController = this.gameObject.GetComponent<PlayerController>();
     }
+    private void Start()
+    {
+        GameManager.gameManager.OnTriggerPlayerHit += GetAttack;
+    }
+
+    private void GetAttack(string PlayerTag, Vector2 PushDir)
+    {
+        Debug.Log(PlayerTag + " Get Attack");
+        if (PlayerTag == this.playerController.tag)
+        {
+            this.playerController.SetDrifting();
+            this.rb.velocity=(PushDir*1.2f);
+        }
+    }
 
 
     void Update()
@@ -52,19 +66,24 @@ public class PlayerMovement : MonoBehaviour
         //移動參數比照使用者輸入的內容
         movement.x = Input.GetAxis(InputHorizontal);
         movement.y = Input.GetAxis(InputVertical);
-        if (Input.GetAxisRaw(InputDash)!= 0 && playerController.CheckCanDash())
+        if (Input.GetAxisRaw(InputDash) != 0 && playerController.CheckCanDash())
         {
             Debug.Log("Dash");
             playerController.PlayerDash();
-            this.rb.AddForce(this.movement * MoveSpeed*1.5f);
+            this.rb.AddForce(this.movement * MoveSpeed * 1.5f);
         }
+    }
+
+    public Vector2 GetVelocity()
+    {
+        return this.rb.velocity;
     }
 
     private void FixedUpdate()
     {
         if (playerController.CheckState() != 0) return;
-  
+
         //依照移動參數*速度決定移動
-        this.rb.velocity= this.movement * MoveSpeed * Time.deltaTime;
+        this.rb.velocity = this.movement * MoveSpeed * Time.deltaTime;
     }
 }
