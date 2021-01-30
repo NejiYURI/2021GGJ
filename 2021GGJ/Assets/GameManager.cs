@@ -43,6 +43,8 @@ public class GameManager : MonoBehaviour
 
     public Text GameOverText;
 
+    public Text StartCountDown;
+
     [SerializeField]
     private List<ScoreData> ScoreBoard;
 
@@ -55,8 +57,7 @@ public class GameManager : MonoBehaviour
 
     private void Start()
     {
-        BeaconRePosition();
-        StartCoroutine(CountDown());
+        StartCoroutine(GameStartCountDown(3));
         this.GameOverPanel.SetActive(false);
         this.ScoreBoard = new List<ScoreData>();
     }
@@ -121,6 +122,15 @@ public class GameManager : MonoBehaviour
         if (OnTriggerGetScore != null)
         {
             OnTriggerGetScore();
+        }
+    }
+
+    public event Action OnTriggerGameStart;
+    public void TriggerGameStart()
+    {
+        if (OnTriggerGameStart != null)
+        {
+            OnTriggerGameStart();
         }
     }
 
@@ -207,5 +217,22 @@ public class GameManager : MonoBehaviour
             this.TimeRemainText.text = this.TimeRemain.ToString("f1");
         if (TimeRemain <= 0) { TimeUp(); } else { StartCoroutine(CountDown()); }
      
+    }
+
+    IEnumerator GameStartCountDown(int Counter)
+    {
+        Debug.Log(Counter);
+        this.StartCountDown.text = Counter.ToString();
+        if (Counter <= 0)
+        {
+            BeaconRePosition();
+            StartCoroutine(CountDown());
+            this.StartCountDown.enabled = false;
+            TriggerGameStart();
+            yield break;
+        }
+        yield return new WaitForSeconds(1f);
+        StartCoroutine(GameStartCountDown(Counter-1));
+
     }
 }

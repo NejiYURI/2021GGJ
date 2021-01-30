@@ -7,6 +7,7 @@ TagManager:
   - Beacon
   - P1
   - P2
+  - P3
   layers:
   - Default
   - TransparentFX

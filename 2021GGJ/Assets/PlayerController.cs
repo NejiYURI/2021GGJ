@@ -24,7 +24,8 @@ public class PlayerController : MonoBehaviour
     {
         Normal,
         Dashing,
-        Drifting
+        Drifting,
+        Pause
     }
 
     [SerializeField]
@@ -34,6 +35,8 @@ public class PlayerController : MonoBehaviour
 
     public List<Model_Signal> SignalSpriteList;
 
+    public SpriteRenderer NoSignalIcon;
+
     private float DashCounter;
 
     public float DashCoolDown;
@@ -41,6 +44,8 @@ public class PlayerController : MonoBehaviour
     public float DashAttackRange;
 
     private Vector2 DashDir;
+
+    public Image DashCooldownProgressBar;
 
     void DashAttackFunc()
     {
@@ -53,7 +58,7 @@ public class PlayerController : MonoBehaviour
             {
                
                 PlayerController targetController = item.gameObject.GetComponent<PlayerController>();
-                if (targetController != null && targetController.CheckState() != 3)
+                if (targetController != null && targetController.CheckState() != 2)
                 {
                    
                     PlayerMovement m_Player = this.gameObject.GetComponent<PlayerMovement>();
@@ -72,12 +77,16 @@ public class PlayerController : MonoBehaviour
         GameManager.gameManager.OnTriggerBeaconIn += BeaconIn;
         GameManager.gameManager.OnTriggerBeaconExit += BeaconExit;
         GameManager.gameManager.OnTriggerGetScore += SetScore;
+        GameManager.gameManager.OnTriggerGameStart += StartGame;
         this.Score = 0;
         this.ScoreAdd = -1;
         //開始跑分數計算器
         StartCoroutine(ScoreAddIEnum());
         this.SignalIcon.enabled = false;
-        this.state = PlayerState.Normal;
+        this.state = PlayerState.Pause;
+        this.NoSignalIcon.enabled = false;
+        this.DashCooldownProgressBar.fillAmount = 0;
+        this.DashCooldownProgressBar.enabled = false;
     }
 
     private void Update()
@@ -86,6 +95,13 @@ public class PlayerController : MonoBehaviour
         if (this.state == PlayerState.Dashing)
             DashAttackFunc();
 
+
+
+    }
+
+    private void StartGame()
+    {
+        this.state = PlayerState.Normal;
     }
 
     public bool CheckCanDash()
@@ -138,6 +154,15 @@ public class PlayerController : MonoBehaviour
                     break;
                 }
             }
+            if (_BeaconTrigger.IsJam)
+            {
+              
+                this.SignalIcon.color = new Color(1, 0.5f, 0.5f);
+            }
+            else
+            {
+                this.SignalIcon.color = new Color(1, 1, 1);
+            }
             this.ScoreAdd = _BeaconTrigger.AddScore;
         }
     }
@@ -167,15 +192,19 @@ public class PlayerController : MonoBehaviour
     IEnumerator ScoreAddIEnum()
     {
         yield return new WaitForSeconds(0.1f);
-        this.Score += this.ScoreAdd;
-        if (this.Score <= 0)
+        if (this.state != PlayerState.Drifting)
         {
-            this.Score = 0;
-        }
-        if (this.Score >= 100)
-        {
-            this.Score = 100;
-            GameManager.gameManager.PlayerWin(this.tag);
+            this.Score += this.ScoreAdd;
+            if (this.Score <= 0)
+            {
+                this.Score = 0;
+            }
+            if (this.Score >= 100)
+            {
+                this.Score = 100;
+                GameManager.gameManager.PlayerWin(this.tag);
+            }
+            
         }
         if (this.ScoreText != null)
             this.ScoreText.text = this.Score.ToString("f1");
@@ -189,12 +218,19 @@ public class PlayerController : MonoBehaviour
     /// <returns></returns>
     IEnumerator DashCooldownIEum()
     {
+        this.DashCooldownProgressBar.enabled = true;
         yield return new WaitForSeconds(0.1f);
         DashCounter -= 0.1f;
+        this.DashCooldownProgressBar.fillAmount = 1-(DashCounter / this.DashCoolDown);
 
         if (DashCounter > 0)
         {
             StartCoroutine(DashCooldownIEum());
+        }
+        else
+        {
+            this.DashCooldownProgressBar.fillAmount = 0;
+            this.DashCooldownProgressBar.enabled = false;
         }
     }
 
@@ -207,9 +243,10 @@ public class PlayerController : MonoBehaviour
 
     IEnumerator GetHitRecover(float Counter)
     {
+        this.NoSignalIcon.enabled = true;
         yield return new WaitForSeconds(0.1f);
         Counter += 0.1f;
-
+        this.NoSignalIcon.enabled = false;
         if (Counter < 1f)
         {
             StartCoroutine(GetHitRecover(Counter));

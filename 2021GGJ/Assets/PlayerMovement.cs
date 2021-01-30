@@ -65,7 +65,7 @@ public class PlayerMovement : MonoBehaviour
         {
             this.playerController.SetDrifting();
             //this.rb.velocity = (PushDir * 1.2f);
-            this.rb.AddForce(PushDir * 100f);
+            this.rb.AddForce(PushDir * 80f);
             if (this.playerAudio != null)
             {
                 this.playerAudio.PlayDamageAudio();
@@ -76,6 +76,7 @@ public class PlayerMovement : MonoBehaviour
 
     void Update()
     {
+        if (playerController.CheckState() == 2 || playerController.CheckState() == 3) return;
         //移動參數比照使用者輸入的內容
         movement.x = Input.GetAxis(InputHorizontal);
         movement.y = Input.GetAxis(InputVertical);
@@ -109,7 +110,7 @@ public class PlayerMovement : MonoBehaviour
 
     private void FixedUpdate()
     {
-        if (playerController.CheckState() == 3) return;
+        if (playerController.CheckState() == 2 || playerController.CheckState() == 3) return;
 
         //依照移動參數*速度決定移動
         this.rb.velocity = this.movement * MoveSpeed * SpeedPara * Time.deltaTime;

@@ -34,13 +34,12 @@ public class BeaconScript : MonoBehaviour
 
     private void Awake()
     {
-
         this.thiscol = this.gameObject.GetComponent<CircleCollider2D>();
     }
     private void Start()
     {
         this.LifeTime = 0;
-        this.IsActive = true;
+        this.IsActive = false;
         this.PlayerInfieldList = new List<InFieldData>();
        // SetBeacon(new Vector2(Random.Range(-9, 9), Random.Range(-5, 5)), 5);
     }
@@ -74,7 +73,12 @@ public class BeaconScript : MonoBehaviour
             //檢查碰撞物件層級是否為編號6(玩家Layer)
             if (collision.gameObject.layer == 6)
             {
-
+                PlayerController playerController = collision.gameObject.GetComponent<PlayerController>();
+                if (playerController.CheckState() == 2) {
+                    this.PlayerInfieldList.RemoveAll(x => x.PlayerTag.Equals(collision.tag));
+                    return;
+                }
+               
                 float dis = Vector2.Distance(this.transform.position, collision.transform.position);
                 float dis_per = (dis / this.thiscol.radius) * 100;
                 if (!this.PlayerInfieldList.Exists(x => x.PlayerTag.Equals(collision.tag)))
@@ -98,7 +102,7 @@ public class BeaconScript : MonoBehaviour
                     }
                 }
                 //觸發訂閱事件
-                GameManager.gameManager.TriggerBeaconIn(new Model_BeaconTrigger(collision.tag, ScoreAdd, dis_per));
+                GameManager.gameManager.TriggerBeaconIn(new Model_BeaconTrigger(collision.tag, ScoreAdd/((this.PlayerInfieldList.Count==0)?1: this.PlayerInfieldList.Count), dis_per, this.PlayerInfieldList.Count > 1));
             }
         }
 
@@ -126,7 +130,7 @@ public class BeaconScript : MonoBehaviour
         this.LifeTime = LifeTime;
         this.LifeTimeCounter = 0;
         this.IsActive = true;
-        this.thiscol.radius = Random.Range(2,6);
+        //this.thiscol.radius = Random.Range(2,6);
         StartCoroutine(ScoreAddIEnum());
     }
 
