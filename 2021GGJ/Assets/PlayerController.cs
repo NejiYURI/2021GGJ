@@ -24,7 +24,8 @@ public class PlayerController : MonoBehaviour
     {
         Normal,
         Dashing,
-        Drifting
+        Drifting,
+        Pause
     }
 
     [SerializeField]
@@ -34,17 +35,22 @@ public class PlayerController : MonoBehaviour
 
     public List<Model_Signal> SignalSpriteList;
 
+    public SpriteRenderer NoSignalIcon;
+
     private float DashCounter;
 
     public float DashCoolDown;
 
     public float DashAttackRange;
 
+    private Vector2 DashDir;
+
+    public Image DashCooldownProgressBar;
+
     void DashAttackFunc()
     {
         //取得攻擊範圍內打到多少物件
         Collider2D[] TargetHit = Physics2D.OverlapCircleAll(this.transform.position, this.DashAttackRange);
-
         //一一篩選物件
         foreach (Collider2D item in TargetHit)
         {
@@ -52,16 +58,16 @@ public class PlayerController : MonoBehaviour
             {
                
                 PlayerController targetController = item.gameObject.GetComponent<PlayerController>();
-                if (targetController != null && targetController.CheckState() != 3)
+                if (targetController != null && targetController.CheckState() != 2)
                 {
-                    Debug.Log("Dash Hit " + item.gameObject.tag);
+                   
                     PlayerMovement m_Player = this.gameObject.GetComponent<PlayerMovement>();
-                    
-                    GameManager.gameManager.TriggerPlayerHit(item.tag, m_Player.GetVelocity());
-                    //m_Player.SetVelocity(Vector2.zero);
+                    Debug.Log("Dash Hit " + this.DashDir);
+                    GameManager.gameManager.TriggerPlayerHit(item.tag, this.DashDir);
+                    m_Player.SetVelocity(Vector2.zero);
+                    m_Player.stopPos();
                 }
             }
-
         }
     }
 
@@ -70,12 +76,17 @@ public class PlayerController : MonoBehaviour
         //將功能加入訂閱(進入、離開訊號發送點)
         GameManager.gameManager.OnTriggerBeaconIn += BeaconIn;
         GameManager.gameManager.OnTriggerBeaconExit += BeaconExit;
+        GameManager.gameManager.OnTriggerGetScore += SetScore;
+        GameManager.gameManager.OnTriggerGameStart += StartGame;
         this.Score = 0;
         this.ScoreAdd = -1;
         //開始跑分數計算器
         StartCoroutine(ScoreAddIEnum());
         this.SignalIcon.enabled = false;
-        this.state = PlayerState.Normal;
+        this.state = PlayerState.Pause;
+        this.NoSignalIcon.enabled = false;
+        this.DashCooldownProgressBar.fillAmount = 0;
+        this.DashCooldownProgressBar.enabled = false;
     }
 
     private void Update()
@@ -84,6 +95,13 @@ public class PlayerController : MonoBehaviour
         if (this.state == PlayerState.Dashing)
             DashAttackFunc();
 
+
+
+    }
+
+    private void StartGame()
+    {
+        this.state = PlayerState.Normal;
     }
 
     public bool CheckCanDash()
@@ -100,10 +118,11 @@ public class PlayerController : MonoBehaviour
         return (int)state;
     }
 
-    public void PlayerDash()
+    public void PlayerDash(Vector2 dir)
     {
         this.state = PlayerState.Dashing;
         this.DashCounter = DashCoolDown;
+        this.DashDir = dir;
         StartCoroutine(DashCooldownIEum());
         StartCoroutine(DashStateEndIEum());
     }
@@ -135,6 +154,15 @@ public class PlayerController : MonoBehaviour
                     break;
                 }
             }
+            if (_BeaconTrigger.IsJam)
+            {
+              
+                this.SignalIcon.color = new Color(1, 0.5f, 0.5f);
+            }
+            else
+            {
+                this.SignalIcon.color = new Color(1, 1, 1);
+            }
             this.ScoreAdd = _BeaconTrigger.AddScore;
         }
     }
@@ -152,6 +180,11 @@ public class PlayerController : MonoBehaviour
         }
     }
 
+    private void SetScore()
+    {
+        GameManager.gameManager.UploadScore(this.tag,this.Score);
+    }
+
     /// <summary>
     /// 分數計算器，依設定頻率增加或減少玩家的分數
     /// </summary>
@@ -159,14 +192,19 @@ public class PlayerController : MonoBehaviour
     IEnumerator ScoreAddIEnum()
     {
         yield return new WaitForSeconds(0.1f);
-        this.Score += this.ScoreAdd;
-        if (this.Score <= 0)
+        if (this.state != PlayerState.Drifting)
         {
-            this.Score = 0;
-        }
-        if (this.Score >= 100)
-        {
-            this.Score = 100;
+            this.Score += this.ScoreAdd;
+            if (this.Score <= 0)
+            {
+                this.Score = 0;
+            }
+            if (this.Score >= 100)
+            {
+                this.Score = 100;
+                GameManager.gameManager.PlayerWin(this.tag);
+            }
+            
         }
         if (this.ScoreText != null)
             this.ScoreText.text = this.Score.ToString("f1");
@@ -180,12 +218,19 @@ public class PlayerController : MonoBehaviour
     /// <returns></returns>
     IEnumerator DashCooldownIEum()
     {
+        this.DashCooldownProgressBar.enabled = true;
         yield return new WaitForSeconds(0.1f);
         DashCounter -= 0.1f;
+        this.DashCooldownProgressBar.fillAmount = 1-(DashCounter / this.DashCoolDown);
 
         if (DashCounter > 0)
         {
             StartCoroutine(DashCooldownIEum());
+        }
+        else
+        {
+            this.DashCooldownProgressBar.fillAmount = 0;
+            this.DashCooldownProgressBar.enabled = false;
         }
     }
 
@@ -198,10 +243,11 @@ public class PlayerController : MonoBehaviour
 
     IEnumerator GetHitRecover(float Counter)
     {
+        this.NoSignalIcon.enabled = true;
         yield return new WaitForSeconds(0.1f);
         Counter += 0.1f;
-
-        if (Counter < 0.5f)
+        this.NoSignalIcon.enabled = false;
+        if (Counter < 1f)
         {
             StartCoroutine(GetHitRecover(Counter));
         }

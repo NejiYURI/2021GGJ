@@ -3,11 +3,12 @@
 /// </summary>
 public class Model_BeaconTrigger
 {
-    public Model_BeaconTrigger(string playertag, float addscore,float distance_per)
+    public Model_BeaconTrigger(string playertag, float addscore,float distance_per,bool isjam)
     {
         this.PlayerTag = playertag;
         this.Distance_Percentage = distance_per;
         this.AddScore = addscore;
+        this.IsJam = isjam;
     }
 
     /// <summary>
@@ -24,4 +25,9 @@ public class Model_BeaconTrigger
     /// 距離(百分比)
     /// </summary>
     public float Distance_Percentage;
+
+    /// <summary>
+    /// 是否被吃流量
+    /// </summary>
+    public bool IsJam;
 }
