@@ -41,6 +41,7 @@ public class BeaconScript : MonoBehaviour
         this.LifeTime = 0;
         this.IsActive = false;
         this.PlayerInfieldList = new List<InFieldData>();
+        this.thiscol.enabled = false;
        // SetBeacon(new Vector2(Random.Range(-9, 9), Random.Range(-5, 5)), 5);
     }
     /// <summary>
@@ -81,6 +82,7 @@ public class BeaconScript : MonoBehaviour
                
                 float dis = Vector2.Distance(this.transform.position, collision.transform.position);
                 float dis_per = (dis / this.thiscol.radius) * 100;
+                if (dis_per > 100) dis_per = 100;
                 if (!this.PlayerInfieldList.Exists(x => x.PlayerTag.Equals(collision.tag)))
                 {
                     this.PlayerInfieldList.Add(new InFieldData { PlayerTag = collision.tag, Dis = dis_per });
@@ -102,7 +104,8 @@ public class BeaconScript : MonoBehaviour
                     }
                 }
                 //觸發訂閱事件
-                GameManager.gameManager.TriggerBeaconIn(new Model_BeaconTrigger(collision.tag, ScoreAdd/((this.PlayerInfieldList.Count==0)?1: this.PlayerInfieldList.Count), dis_per, this.PlayerInfieldList.Count > 1));
+                GameManager.gameManager.TriggerBeaconIn(new Model_BeaconTrigger(collision.tag, ScoreAdd/((this.PlayerInfieldList.Count==0)?1: this.PlayerInfieldList.Count), dis_per));
+                GameManager.gameManager.TriggerSignalIsJam(this.PlayerInfieldList.Count > 1);
             }
         }
 
@@ -117,6 +120,7 @@ public class BeaconScript : MonoBehaviour
             {
                 //Debug.Log(collision.tag + " Exit!!");
                 this.PlayerInfieldList.RemoveAll(x => x.PlayerTag.Equals(collision.tag));
+                GameManager.gameManager.TriggerSignalIsJam(this.PlayerInfieldList.Count > 1);
                 //觸發訂閱事件
                 GameManager.gameManager.TriggerBeaconExit(collision.tag);
             }
@@ -130,6 +134,7 @@ public class BeaconScript : MonoBehaviour
         this.LifeTime = LifeTime;
         this.LifeTimeCounter = 0;
         this.IsActive = true;
+        this.thiscol.enabled = true;
         //this.thiscol.radius = Random.Range(2,6);
         StartCoroutine(ScoreAddIEnum());
     }
@@ -141,7 +146,10 @@ public class BeaconScript : MonoBehaviour
         if (this.LifeTimeCounter >= this.LifeTime)
         {
             this.IsActive = false;
+            this.thiscol.enabled = false;
             this.spriteRenderer.color = new Color(this.spriteRenderer.color.r, this.spriteRenderer.color.g, this.spriteRenderer.color.b,0);
+            this.PlayerInfieldList = new List<InFieldData>();
+            GameManager.gameManager.TriggerSignalIsJam(false);
             GameManager.gameManager.TriggerBeaconReposition();
             //SetBeacon(new Vector2(Random.Range(-9, 9), Random.Range(-5, 5)), 5);
         }

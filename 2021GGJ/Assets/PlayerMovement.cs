@@ -65,7 +65,7 @@ public class PlayerMovement : MonoBehaviour
         {
             this.playerController.SetDrifting();
             //this.rb.velocity = (PushDir * 1.2f);
-            this.rb.AddForce(PushDir * 80f);
+            this.rb.AddForce(PushDir * 2f);
             if (this.playerAudio != null)
             {
                 this.playerAudio.PlayDamageAudio();
@@ -110,10 +110,6 @@ public class PlayerMovement : MonoBehaviour
 
     private void FixedUpdate()
     {
-        if (playerController.CheckState() == 2 || playerController.CheckState() == 3) return;
-
-        //依照移動參數*速度決定移動
-        this.rb.velocity = this.movement * MoveSpeed * SpeedPara * Time.deltaTime;
         if (this.playerAudio != null)
         {
             if (this.movement != Vector2.zero)
@@ -125,6 +121,10 @@ public class PlayerMovement : MonoBehaviour
                 playerAudio.StopRunAudio();
             }
         }
+        if (playerController.CheckState() == 2 || playerController.CheckState() == 3 || this.movement==Vector2.zero) return;
+        //依照移動參數*速度決定移動
+        this.rb.MovePosition(this.rb.position + this.movement * MoveSpeed * SpeedPara * Time.deltaTime);
+        
 
 
         if (this.movement.x > 0)
@@ -139,7 +139,7 @@ public class PlayerMovement : MonoBehaviour
 
     IEnumerator DashingIEum()
     {
-        this.SpeedPara = 5f;
+        this.SpeedPara = 3f;
         yield return new WaitForSeconds(0.1f);
         this.SpeedPara = 1f;
     }
