@@ -6,7 +6,7 @@ InputManager:
   serializedVersion: 2
   m_Axes:
   - serializedVersion: 3
-    m_Name: P1Horizontal
+    m_Name: P2Horizontal
     descriptiveName: 
     descriptiveNegativeName: 
     negativeButton: left
@@ -22,7 +22,7 @@ InputManager:
     axis: 0
     joyNum: 0
   - serializedVersion: 3
-    m_Name: P2Horizontal
+    m_Name: P1Horizontal
     descriptiveName: 
     descriptiveNegativeName: 
     negativeButton: a
@@ -54,7 +54,7 @@ InputManager:
     axis: 0
     joyNum: 0
   - serializedVersion: 3
-    m_Name: P1Vertical
+    m_Name: P2Vertical
     descriptiveName: 
     descriptiveNegativeName: 
     negativeButton: down
@@ -70,7 +70,7 @@ InputManager:
     axis: 0
     joyNum: 0
   - serializedVersion: 3
-    m_Name: P2Vertical
+    m_Name: P1Vertical
     descriptiveName: 
     descriptiveNegativeName: 
     negativeButton: s
@@ -102,12 +102,12 @@ InputManager:
     axis: 0
     joyNum: 0
   - serializedVersion: 3
-    m_Name: P1Dash
+    m_Name: P2Dash
     descriptiveName: 
     descriptiveNegativeName: 
-    negativeButton: return
+    negativeButton: right ctrl
     positiveButton: 
-    altNegativeButton: 
+    altNegativeButton: '[0]'
     altPositiveButton: 
     gravity: 1000
     dead: 0.001
@@ -118,11 +118,11 @@ InputManager:
     axis: 0
     joyNum: 0
   - serializedVersion: 3
-    m_Name: P2Dash
+    m_Name: P1Dash
     descriptiveName: 
     descriptiveNegativeName: 
     negativeButton: 
-    positiveButton: e
+    positiveButton: space
     altNegativeButton: 
     altPositiveButton: 
     gravity: 1000

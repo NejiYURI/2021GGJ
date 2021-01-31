@@ -39,11 +39,15 @@ public class GameManager : MonoBehaviour
 
     public float TimeRemain;
 
+    private float TotalTime;
+
     public Text TimeRemainText;
 
     public Text GameOverText;
 
     public Text StartCountDown;
+
+    public Image TimerImage;
 
     [SerializeField]
     private List<ScoreData> ScoreBoard;
@@ -60,9 +64,16 @@ public class GameManager : MonoBehaviour
         StartCoroutine(GameStartCountDown(3));
         this.GameOverPanel.SetActive(false);
         this.ScoreBoard = new List<ScoreData>();
+        if (this.TimerImage != null)
+        {
+            this.TimerImage.fillAmount = 1;
+        }
+        
+        this.TotalTime = this.TimeRemain;
+        this.TimeRemainText.text = this.TimeRemain.ToString("f1")+"S";
     }
 
-  
+
     /// <summary>
     /// 訂閱事件:玩家進入訊號範圍
     /// </summary>
@@ -134,6 +145,15 @@ public class GameManager : MonoBehaviour
         }
     }
 
+    public event Action<bool> OnTriggerSignalIsJam;
+    public void TriggerSignalIsJam(bool IsJam)
+    {
+        if (OnTriggerSignalIsJam != null)
+        {
+            OnTriggerSignalIsJam(IsJam);
+        }
+    }
+
     private void BeaconRePosition()
     {
         int Index = UnityEngine.Random.Range(0, this.BeaconPositionList.Count - ((this.LastPos != null) ? 1 : 0));
@@ -142,16 +162,16 @@ public class GameManager : MonoBehaviour
         this.BeaconPositionList.Add(LastPos);
         List<BeaconScore> scoreSet = new List<BeaconScore>();
         scoreSet.Add(new BeaconScore { Distance = 100, Score = 0 });
-        scoreSet.Add(new BeaconScore { Distance = 75, Score = UnityEngine.Random.Range(0.1f, 0.3f) });
+        scoreSet.Add(new BeaconScore { Distance = 75, Score = UnityEngine.Random.Range(0.2f, 0.3f) });
         scoreSet.Add(new BeaconScore { Distance = 50, Score = UnityEngine.Random.Range(0.3f, 0.5f) });
-        scoreSet.Add(new BeaconScore { Distance = 25, Score = UnityEngine.Random.Range(0.3f, 0.8f) });
+        scoreSet.Add(new BeaconScore { Distance = 25, Score = UnityEngine.Random.Range(0.5f, 0.8f) });
         this.beacon.SetBeacon(LastPos.position, scoreSet, UnityEngine.Random.Range(8, 15));
     }
 
 
-    public void UploadScore(string PlayerTag,float Score=0)
+    public void UploadScore(string PlayerTag, float Score = 0)
     {
-        ScoreBoard.Add(new ScoreData { PlayerName= PlayerTag, Score= Score });
+        ScoreBoard.Add(new ScoreData { PlayerName = PlayerTag, Score = Score });
     }
     public void PlayerWin(string PlayerName)
     {
@@ -164,11 +184,11 @@ public class GameManager : MonoBehaviour
     {
         TriggerGetScore();
         Time.timeScale = 0;
-        
-        ScoreBoard =ScoreBoard.OrderByDescending(x => x.Score).ToList();
-        int WinnerCnt=0;
+
+        ScoreBoard = ScoreBoard.OrderByDescending(x => x.Score).ToList();
+        int WinnerCnt = 0;
         int rowCnt = 0;
-        float lastScore=0;
+        float lastScore = 0;
         string ShowTxt = "";
         foreach (var item in ScoreBoard)
         {
@@ -203,20 +223,25 @@ public class GameManager : MonoBehaviour
 
     public void Restart_Game()
     {
-       // Debug.Log("In");
+        // Debug.Log("In");
         Time.timeScale = 1;
         SceneManager.LoadScene("PlayScene");
-       
+
     }
 
     IEnumerator CountDown()
     {
         yield return new WaitForSeconds(0.1f);
         this.TimeRemain -= 0.1f;
+        if (TimeRemain <= 0) this.TimeRemain = 0;
         if (this.TimeRemainText != null)
-            this.TimeRemainText.text = this.TimeRemain.ToString("f1");
+            this.TimeRemainText.text = this.TimeRemain.ToString("f1") + "S";
+        if (this.TimerImage != null)
+        {
+            this.TimerImage.fillAmount = this.TimeRemain / this.TotalTime;
+        }
         if (TimeRemain <= 0) { TimeUp(); } else { StartCoroutine(CountDown()); }
-     
+
     }
 
     IEnumerator GameStartCountDown(int Counter)
@@ -232,7 +257,7 @@ public class GameManager : MonoBehaviour
             yield break;
         }
         yield return new WaitForSeconds(1f);
-        StartCoroutine(GameStartCountDown(Counter-1));
+        StartCoroutine(GameStartCountDown(Counter - 1));
 
     }
 }

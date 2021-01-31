@@ -13,12 +13,18 @@ public class PlayerController : MonoBehaviour
     /// <summary>
     /// 分數每秒(?)增加參數
     /// </summary>
+    [SerializeField]
     private float ScoreAdd;
 
+    ///// <summary>
+    ///// 顯示文字(可能替換)
+    ///// </summary>
+    //public Text ScoreText;
+
     /// <summary>
-    /// 顯示文字(可能替換)
+    /// 分數進度條
     /// </summary>
-    public Text ScoreText;
+    public Image ProgressBar;
 
     public enum PlayerState
     {
@@ -47,6 +53,8 @@ public class PlayerController : MonoBehaviour
 
     public Image DashCooldownProgressBar;
 
+    private bool IsFlashing;
+
     void DashAttackFunc()
     {
         //取得攻擊範圍內打到多少物件
@@ -56,11 +64,11 @@ public class PlayerController : MonoBehaviour
         {
             if (item.gameObject.layer == 6 && item.gameObject.tag != this.tag)
             {
-               
+
                 PlayerController targetController = item.gameObject.GetComponent<PlayerController>();
                 if (targetController != null && targetController.CheckState() != 2)
                 {
-                   
+
                     PlayerMovement m_Player = this.gameObject.GetComponent<PlayerMovement>();
                     Debug.Log("Dash Hit " + this.DashDir);
                     GameManager.gameManager.TriggerPlayerHit(item.tag, this.DashDir);
@@ -78,6 +86,8 @@ public class PlayerController : MonoBehaviour
         GameManager.gameManager.OnTriggerBeaconExit += BeaconExit;
         GameManager.gameManager.OnTriggerGetScore += SetScore;
         GameManager.gameManager.OnTriggerGameStart += StartGame;
+        GameManager.gameManager.OnTriggerBeaconReposition += BeaconReset;
+        GameManager.gameManager.OnTriggerSignalIsJam += SignalIsJam;
         this.Score = 0;
         this.ScoreAdd = -1;
         //開始跑分數計算器
@@ -87,6 +97,13 @@ public class PlayerController : MonoBehaviour
         this.NoSignalIcon.enabled = false;
         this.DashCooldownProgressBar.fillAmount = 0;
         this.DashCooldownProgressBar.enabled = false;
+        if (this.ProgressBar != null)
+        {
+            this.ProgressBar.fillAmount = 0;
+            this.ProgressBar.color = new Color(1, 0, 0);
+        }
+        this.IsFlashing = false;
+
     }
 
     private void Update()
@@ -95,7 +112,11 @@ public class PlayerController : MonoBehaviour
         if (this.state == PlayerState.Dashing)
             DashAttackFunc();
 
-
+        if (this.ScoreAdd <= 0 && !this.IsFlashing)
+        {
+            this.IsFlashing = true;
+            StartCoroutine(ProgressBarFlash());
+        }
 
     }
 
@@ -154,16 +175,20 @@ public class PlayerController : MonoBehaviour
                     break;
                 }
             }
-            if (_BeaconTrigger.IsJam)
-            {
-              
-                this.SignalIcon.color = new Color(1, 0.5f, 0.5f);
-            }
-            else
-            {
-                this.SignalIcon.color = new Color(1, 1, 1);
-            }
             this.ScoreAdd = _BeaconTrigger.AddScore;
+        }
+    }
+
+    private void SignalIsJam(bool IsJam)
+    {
+        if (IsJam)
+        {
+
+            this.SignalIcon.color = new Color(1, 0.5f, 0.5f);
+        }
+        else
+        {
+            this.SignalIcon.color = new Color(1, 1, 1);
         }
     }
 
@@ -175,14 +200,18 @@ public class PlayerController : MonoBehaviour
     {
         if (Tag.Equals(this.tag))
         {
-            this.ScoreAdd = -0.1f;
-            this.SignalIcon.enabled = false;
+            BeaconReset();
         }
+    }
+    private void BeaconReset()
+    {
+        this.ScoreAdd = -0.2f;
+        this.SignalIcon.enabled = false;
     }
 
     private void SetScore()
     {
-        GameManager.gameManager.UploadScore(this.tag,this.Score);
+        GameManager.gameManager.UploadScore(this.tag, this.Score);
     }
 
     /// <summary>
@@ -204,12 +233,33 @@ public class PlayerController : MonoBehaviour
                 this.Score = 100;
                 GameManager.gameManager.PlayerWin(this.tag);
             }
-            
+
         }
-        if (this.ScoreText != null)
-            this.ScoreText.text = this.Score.ToString("f1");
+        //if (this.ScoreText != null)
+        //    this.ScoreText.text = this.Score.ToString("f1");
+        if (this.ProgressBar != null)
+        {
+            float progres_Val = this.Score / 100f;
+            this.ProgressBar.fillAmount = progres_Val;
+            this.ProgressBar.color = new Color(1- progres_Val, progres_Val, 0);
+        }
 
         StartCoroutine(ScoreAddIEnum());
+    }
+
+    IEnumerator ProgressBarFlash()
+    {
+        this.ProgressBar.color = new Color(this.ProgressBar.color.r, this.ProgressBar.color.g, this.ProgressBar.color.b, (this.ProgressBar.color.a > 0) ? 0 : 1);
+        yield return new WaitForSeconds(0.05f);
+        if (this.ScoreAdd <= 0)
+        {
+            StartCoroutine(ProgressBarFlash());
+        }
+        else
+        {
+            this.IsFlashing = false;
+        }
+      
     }
 
     /// <summary>
@@ -221,7 +271,7 @@ public class PlayerController : MonoBehaviour
         this.DashCooldownProgressBar.enabled = true;
         yield return new WaitForSeconds(0.1f);
         DashCounter -= 0.1f;
-        this.DashCooldownProgressBar.fillAmount = 1-(DashCounter / this.DashCoolDown);
+        this.DashCooldownProgressBar.fillAmount = 1 - (DashCounter / this.DashCoolDown);
 
         if (DashCounter > 0)
         {
