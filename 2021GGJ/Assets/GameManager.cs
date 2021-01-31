@@ -13,6 +13,9 @@ public class GameManager : MonoBehaviour
     /// </summary>
     public static GameManager gameManager;
 
+    /// <summary>
+    /// 遊戲結束的顯示內容
+    /// </summary>
     public GameObject GameOverPanel;
 
     [System.Serializable]
@@ -31,33 +34,77 @@ public class GameManager : MonoBehaviour
         public float Score;
     }
 
+    /// <summary>
+    /// 訊號的生成點
+    /// </summary>
     public List<Transform> BeaconPositionList;
 
+    /// <summary>
+    /// 上次的訊號生成位置(為求不重複)
+    /// </summary>
     public Transform LastPos;
 
+    /// <summary>
+    /// 訊號點
+    /// </summary>
     public BeaconScript beacon;
 
+    /// <summary>
+    /// 遊戲時間(倒數)
+    /// </summary>
     public float TimeRemain;
 
+    /// <summary>
+    /// 遊戲總時間
+    /// </summary>
     private float TotalTime;
 
+    /// <summary>
+    /// 遊戲時間文字
+    /// </summary>
     public Text TimeRemainText;
 
+    /// <summary>
+    /// 遊戲結束顯示文字
+    /// </summary>
     public Text GameOverText;
 
+    /// <summary>
+    /// 遊戲開始倒數文字
+    /// </summary>
     public Text StartCountDown;
 
+    /// <summary>
+    /// 時鐘圖片(遊戲倒數用)
+    /// </summary>
     public Image TimerImage;
 
+    /// <summary>
+    /// 結算成績用List
+    /// </summary>
     [SerializeField]
     private List<ScoreData> ScoreBoard;
 
+    /// <summary>
+    /// 風吹的區域
+    /// </summary>
     public GameObject WindZone;
 
+    /// <summary>
+    /// 關燈的區域
+    /// </summary>
     public GameObject BlackOutZone;
 
+    /// <summary>
+    /// 事件道具列表
+    /// </summary>
     public List<GameObject> TrapObject;
 
+    public List<string> JoyConPlayerList;
+
+    /// <summary>
+    /// 音效控制
+    /// </summary>
     public AudioSource SoundEffectControl;
 
 
@@ -65,10 +112,34 @@ public class GameManager : MonoBehaviour
     {
         //宣告(重要)
         gameManager = this;
+
+        //檢查是否無連接搖桿(消除P3、P4)
+        string[] JoyconList = Input.GetJoystickNames();
+        for (int Index = 0; Index < this.JoyConPlayerList.Count; Index++)
+        {
+            if (Index > JoyconList.Count()-1)
+            {
+                GameObject[] objList = GameObject.FindGameObjectsWithTag(JoyConPlayerList[Index]);
+                for (int j = 0; j < objList.Count(); j++)
+                {
+                    objList[j].SetActive(false);
+                }
+            }
+            else if (string.IsNullOrEmpty(JoyconList[Index]))
+            {
+                GameObject[] objList = GameObject.FindGameObjectsWithTag(JoyConPlayerList[Index]);
+                for (int j = 0; j < objList.Count(); j++)
+                {
+                    objList[j].SetActive(false);
+                }
+            }
+            
+        }
     }
 
     private void Start()
     {
+        //遊戲開始倒數三秒
         StartCoroutine(GameStartCountDown(3));
         this.GameOverPanel.SetActive(false);
         this.ScoreBoard = new List<ScoreData>();
@@ -118,7 +189,15 @@ public class GameManager : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// 玩家受到攻擊
+    /// </summary>
     public event Action<string, Vector2> OnTriggerPlayerHit;
+    /// <summary>
+    /// 事件觸發:玩家受到攻擊
+    /// </summary>
+    /// <param name="PlayerTag">玩家標籤</param>
+    /// <param name="Dir">推行方向</param>
     public void TriggerPlayerHit(string PlayerTag, Vector2 Dir)
     {
         if (OnTriggerPlayerHit != null)
@@ -127,6 +206,9 @@ public class GameManager : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// 訂閱事件:訊號源變更
+    /// </summary>
     public event Action OnTriggerBeaconReposition;
     public void TriggerBeaconReposition()
     {
@@ -137,6 +219,9 @@ public class GameManager : MonoBehaviour
         BeaconRePosition();
     }
 
+    /// <summary>
+    /// 訂閱事件:遊戲時間到後取得玩家分數
+    /// </summary>
     public event Action OnTriggerGetScore;
     public void TriggerGetScore()
     {
@@ -146,6 +231,9 @@ public class GameManager : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// 訂閱事件:遊戲開始
+    /// </summary>
     public event Action OnTriggerGameStart;
     public void TriggerGameStart()
     {
@@ -155,6 +243,9 @@ public class GameManager : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// 訂閱事件:訊號是否有被分流(多人於訊號源中)
+    /// </summary>
     public event Action<bool> OnTriggerSignalIsJam;
     public void TriggerSignalIsJam(bool IsJam)
     {
@@ -164,6 +255,9 @@ public class GameManager : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// 訊號源位置變更
+    /// </summary>
     private void BeaconRePosition()
     {
         int Index = UnityEngine.Random.Range(0, this.BeaconPositionList.Count - ((this.LastPos != null) ? 1 : 0));
@@ -178,7 +272,12 @@ public class GameManager : MonoBehaviour
         this.beacon.SetBeacon(LastPos.position, scoreSet, UnityEngine.Random.Range(8, 15));
     }
 
-    public void StartTrap(string trap,AudioClip clip)
+    /// <summary>
+    /// 開始特殊事件
+    /// </summary>
+    /// <param name="trap">事件名稱</param>
+    /// <param name="clip">觸發音效</param>
+    public void StartTrap(string trap, AudioClip clip)
     {
         switch (trap)
         {
@@ -196,28 +295,43 @@ public class GameManager : MonoBehaviour
         }
     }
 
-
+    /// <summary>
+    /// 玩家上傳分數功能(遊戲時間到後比較分數)
+    /// </summary>
+    /// <param name="PlayerTag">玩家標籤</param>
+    /// <param name="Score">分數</param>
     public void UploadScore(string PlayerTag, float Score = 0)
     {
         ScoreBoard.Add(new ScoreData { PlayerName = PlayerTag, Score = Score });
     }
-    public void PlayerWin(string PlayerName,Sprite WinnerSprite)
+
+    /// <summary>
+    /// 玩家勝利(遊戲結束)
+    /// </summary>
+    /// <param name="PlayerName">玩家標籤(名稱)</param>
+    /// <param name="WinnerSprite">沒有用到的圖片顯示</param>
+    public void PlayerWin(string PlayerName, Sprite WinnerSprite)
     {
         Time.timeScale = 0;
         this.GameOverPanel.SetActive(true);
         this.GameOverText.text = PlayerName + "獲勝!!";
     }
 
+    /// <summary>
+    /// 遊戲時間到，結束遊戲事件
+    /// </summary>
     public void TimeUp()
     {
         TriggerGetScore();
         Time.timeScale = 0;
 
+        //排序分數列表
         ScoreBoard = ScoreBoard.OrderByDescending(x => x.Score).ToList();
         int WinnerCnt = 0;
         int rowCnt = 0;
         float lastScore = 0;
         string ShowTxt = "";
+        //檢查分數是否有平手情形
         foreach (var item in ScoreBoard)
         {
             if (rowCnt == 0)
@@ -249,6 +363,9 @@ public class GameManager : MonoBehaviour
         this.GameOverPanel.SetActive(true);
     }
 
+    /// <summary>
+    /// 重新開始
+    /// </summary>
     public void Restart_Game()
     {
         // Debug.Log("In");
@@ -257,6 +374,9 @@ public class GameManager : MonoBehaviour
 
     }
 
+    /// <summary>
+    /// 回到主畫面
+    /// </summary>
     public void Return_Game()
     {
         Time.timeScale = 1;
@@ -264,6 +384,10 @@ public class GameManager : MonoBehaviour
 
     }
 
+    /// <summary>
+    /// 倒數功能
+    /// </summary>
+    /// <returns></returns>
     IEnumerator CountDown()
     {
         yield return new WaitForSeconds(0.1f);
@@ -279,6 +403,11 @@ public class GameManager : MonoBehaviour
 
     }
 
+    /// <summary>
+    /// 遊戲開始前倒數
+    /// </summary>
+    /// <param name="Counter"></param>
+    /// <returns></returns>
     IEnumerator GameStartCountDown(int Counter)
     {
         Debug.Log(Counter);
@@ -298,6 +427,12 @@ public class GameManager : MonoBehaviour
     }
 
 
+    /// <summary>
+    /// 特殊事件啟動與結束
+    /// </summary>
+    /// <param name="trap"></param>
+    /// <param name="Time"></param>
+    /// <returns></returns>
     IEnumerator StartTrapCour(GameObject trap, int Time)
     {
         trap.SetActive(true);
@@ -307,6 +442,11 @@ public class GameManager : MonoBehaviour
 
     }
 
+    /// <summary>
+    /// 生成事件道具
+    /// </summary>
+    /// <param name="Time"></param>
+    /// <returns></returns>
     IEnumerator TrapSpawnCour(int Time)
     {
 

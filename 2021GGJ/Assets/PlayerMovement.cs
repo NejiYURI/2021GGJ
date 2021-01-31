@@ -32,6 +32,9 @@ public class PlayerMovement : MonoBehaviour
     /// </summary>
     public float MoveSpeed;
 
+    /// <summary>
+    /// 速度加成
+    /// </summary>
     public float SpeedPara;
 
     /// <summary>
@@ -39,10 +42,19 @@ public class PlayerMovement : MonoBehaviour
     /// </summary>
     private Rigidbody2D rb;
 
+    /// <summary>
+    /// 玩家功能script
+    /// </summary>
     private PlayerController playerController;
 
+    /// <summary>
+    /// 玩家圖示
+    /// </summary>
     public SpriteRenderer PlayerImage;
 
+    /// <summary>
+    /// 玩家聲音控制
+    /// </summary>
     private PlayerAudioController playerAudio;
 
     private void Awake()
@@ -58,6 +70,11 @@ public class PlayerMovement : MonoBehaviour
         this.SpeedPara = 1;
     }
 
+    /// <summary>
+    /// 玩家受到攻擊(訂閱事件觸發)
+    /// </summary>
+    /// <param name="PlayerTag"></param>
+    /// <param name="PushDir"></param>
     private void GetAttack(string PlayerTag, Vector2 PushDir)
     {
         Debug.Log(PlayerTag + " Get Attack");
@@ -93,16 +110,27 @@ public class PlayerMovement : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// 取地目前加速度(無用)
+    /// </summary>
+    /// <returns></returns>
     public Vector2 GetVelocity()
     {
         return this.rb.velocity;
     }
 
+    /// <summary>
+    /// 設定加速度
+    /// </summary>
+    /// <param name="Dir"></param>
     public void SetVelocity(Vector2 Dir)
     {
         this.rb.velocity = Dir;
     }
 
+    /// <summary>
+    /// 玩家緊急煞車(=w=)
+    /// </summary>
     public void stopPos()
     {
         this.rb.position = this.rb.position;
@@ -121,6 +149,7 @@ public class PlayerMovement : MonoBehaviour
                 playerAudio.StopRunAudio();
             }
         }
+        //如果玩家處於飄移、暫停、或是無輸入的話，就不執行移動功能
         if (playerController.CheckState() == 2 || playerController.CheckState() == 3 || this.movement==Vector2.zero) return;
         //依照移動參數*速度決定移動
         this.rb.MovePosition(this.rb.position + this.movement * MoveSpeed * SpeedPara * Time.deltaTime);
@@ -137,6 +166,10 @@ public class PlayerMovement : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// 衝刺功能(改變速度參數)
+    /// </summary>
+    /// <returns></returns>
     IEnumerator DashingIEum()
     {
         this.SpeedPara = 3f;

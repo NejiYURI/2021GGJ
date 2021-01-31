@@ -248,6 +248,9 @@ MonoBehaviour:
   TrapObject:
   - {fileID: 9136252963978417710, guid: 6402eeace4c4b474fb7b107b7294e242, type: 3}
   - {fileID: 7057102088568338156, guid: ddd074b2fe48aab448d00801cf135d83, type: 3}
+  JoyConPlayerList:
+  - P3
+  - P4
   SoundEffectControl: {fileID: 1210245371}
 --- !u!4 &72473668
 Transform:
@@ -8915,7 +8918,7 @@ GameObject:
   - component: {fileID: 1550860090}
   m_Layer: 5
   m_Name: P4StatusBox
-  m_TagString: Untagged
+  m_TagString: P4
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -9873,7 +9876,7 @@ GameObject:
   - component: {fileID: 1996736804}
   m_Layer: 5
   m_Name: P3StatusBox
-  m_TagString: Untagged
+  m_TagString: P3
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0

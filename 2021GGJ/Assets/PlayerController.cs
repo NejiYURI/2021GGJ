@@ -26,58 +26,69 @@ public class PlayerController : MonoBehaviour
     /// </summary>
     public Image ProgressBar;
 
+    /// <summary>
+    /// 玩家狀態列表
+    /// </summary>
     public enum PlayerState
     {
-        Normal,
-        Dashing,
-        Drifting,
-        Pause
+        Normal,//一般(移動等)
+        Dashing,//衝刺
+        Drifting,//被撞之後飄移
+        Pause//暫停
     }
 
+    /// <summary>
+    /// 玩家狀態
+    /// </summary>
     [SerializeField]
     private PlayerState state;
 
+    /// <summary>
+    /// 訊號圖示
+    /// </summary>
     public SpriteRenderer SignalIcon;
 
+    /// <summary>
+    /// 顯示用的訊號圖示列表
+    /// </summary>
     public List<Model_Signal> SignalSpriteList;
 
+    /// <summary>
+    /// 被撞的時候的無訊號圖示
+    /// </summary>
     public SpriteRenderer NoSignalIcon;
 
+    /// <summary>
+    /// 計算衝刺回復時間
+    /// </summary>
     private float DashCounter;
 
+    /// <summary>
+    /// 衝刺回復時間
+    /// </summary>
     public float DashCoolDown;
 
+    /// <summary>
+    /// 衝刺攻擊範圍
+    /// </summary>
     public float DashAttackRange;
 
+    /// <summary>
+    /// 衝刺方向
+    /// </summary>
     private Vector2 DashDir;
 
+    /// <summary>
+    /// 衝刺回復顯示條
+    /// </summary>
     public Image DashCooldownProgressBar;
 
+    /// <summary>
+    /// 是否正在閃爍
+    /// </summary>
     private bool IsFlashing;
 
-    void DashAttackFunc()
-    {
-        //取得攻擊範圍內打到多少物件
-        Collider2D[] TargetHit = Physics2D.OverlapCircleAll(this.transform.position, this.DashAttackRange);
-        //一一篩選物件
-        foreach (Collider2D item in TargetHit)
-        {
-            if (item.gameObject.layer == 6 && item.gameObject.tag != this.tag)
-            {
-
-                PlayerController targetController = item.gameObject.GetComponent<PlayerController>();
-                if (targetController != null && targetController.CheckState() != 2)
-                {
-
-                    PlayerMovement m_Player = this.gameObject.GetComponent<PlayerMovement>();
-                    Debug.Log("Dash Hit " + this.DashDir);
-                    GameManager.gameManager.TriggerPlayerHit(item.tag, this.DashDir);
-                    m_Player.SetVelocity(Vector2.zero);
-                    m_Player.stopPos();
-                }
-            }
-        }
-    }
+    
 
     private void Start()
     {
@@ -125,6 +136,10 @@ public class PlayerController : MonoBehaviour
         this.state = PlayerState.Normal;
     }
 
+    /// <summary>
+    /// 檢查是否可以衝刺
+    /// </summary>
+    /// <returns></returns>
     public bool CheckCanDash()
     {
         //Debug.Log(DashCounter);
@@ -134,11 +149,19 @@ public class PlayerController : MonoBehaviour
         return true;
     }
 
+    /// <summary>
+    /// 檢查目前玩家狀態
+    /// </summary>
+    /// <returns></returns>
     public int CheckState()
     {
         return (int)state;
     }
 
+    /// <summary>
+    /// 衝刺事件
+    /// </summary>
+    /// <param name="dir">衝刺方向</param>
     public void PlayerDash(Vector2 dir)
     {
         this.state = PlayerState.Dashing;
@@ -148,12 +171,42 @@ public class PlayerController : MonoBehaviour
         StartCoroutine(DashStateEndIEum());
     }
 
+    /// <summary>
+    /// 玩家被撞後的漂移
+    /// </summary>
     public void SetDrifting()
     {
         this.state = PlayerState.Drifting;
         StartCoroutine(GetHitRecover(0));
     }
 
+    /// <summary>
+    /// 衝刺期間的碰撞判定
+    /// </summary>
+    void DashAttackFunc()
+    {
+        //取得攻擊範圍內打到多少物件
+        Collider2D[] TargetHit = Physics2D.OverlapCircleAll(this.transform.position, this.DashAttackRange);
+        //一一篩選物件
+        foreach (Collider2D item in TargetHit)
+        {
+            if (item.gameObject.layer == 6 && item.gameObject.tag != this.tag)
+            {
+
+                PlayerController targetController = item.gameObject.GetComponent<PlayerController>();
+                if (targetController != null && targetController.CheckState() != 2)
+                {
+
+                    PlayerMovement m_Player = this.gameObject.GetComponent<PlayerMovement>();
+                    Debug.Log("Dash Hit " + this.DashDir);
+                    //觸發碰撞玩家的訂閱事件
+                    GameManager.gameManager.TriggerPlayerHit(item.tag, this.DashDir);
+                    m_Player.SetVelocity(Vector2.zero);
+                    m_Player.stopPos();
+                }
+            }
+        }
+    }
     /// <summary>
     /// 玩家進入訊號範圍
     /// </summary>
@@ -179,6 +232,10 @@ public class PlayerController : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// 調整是否被分流量顯示
+    /// </summary>
+    /// <param name="IsJam"></param>
     private void SignalIsJam(bool IsJam)
     {
         if (IsJam)
@@ -203,12 +260,19 @@ public class PlayerController : MonoBehaviour
             BeaconReset();
         }
     }
+
+    /// <summary>
+    /// 訊號源改變位置，狀態重置
+    /// </summary>
     private void BeaconReset()
     {
         this.ScoreAdd = -0.1f;
         this.SignalIcon.enabled = false;
     }
 
+    /// <summary>
+    /// 上傳分數(遊戲時間到)
+    /// </summary>
     private void SetScore()
     {
         GameManager.gameManager.UploadScore(this.tag, this.Score);
@@ -291,6 +355,11 @@ public class PlayerController : MonoBehaviour
             this.state = PlayerState.Normal;
     }
 
+    /// <summary>
+    /// 被撞之後的回復時間
+    /// </summary>
+    /// <param name="Counter"></param>
+    /// <returns></returns>
     IEnumerator GetHitRecover(float Counter)
     {
         this.NoSignalIcon.enabled = true;
