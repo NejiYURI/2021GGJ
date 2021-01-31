@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 
 public class Messag : MonoBehaviour
@@ -37,6 +38,8 @@ public class Messag : MonoBehaviour
     private SpriteRenderer char75;
     [SerializeField]
     private SpriteRenderer char9;
+    [SerializeField]
+    private Button btn;
 
     IEnumerator ScoreAddIEnum()
     {
@@ -80,6 +83,24 @@ public class Messag : MonoBehaviour
             }
             AddMessage.MessageWriter_Static(messagetext, messageArray[i], .1f, true);
             yield return new WaitForSeconds(4f);
+            if (i == 6)
+            {
+                messagetext.text = "";
+                SceneManager.LoadScene("TitleScene");
+                char1.gameObject.SetActive(false);
+                char2.gameObject.SetActive(false);
+                char3.gameObject.SetActive(false);
+                char4.gameObject.SetActive(false);
+                char5.gameObject.SetActive(false);
+                char6.gameObject.SetActive(false);
+                char71.gameObject.SetActive(false);
+                char8.gameObject.SetActive(false);
+                char72.gameObject.SetActive(false);
+                char73.gameObject.SetActive(false);
+                char74.gameObject.SetActive(false);
+                char75.gameObject.SetActive(false);
+                char9.gameObject.SetActive(false);
+            }
             char1.gameObject.SetActive(false);
             char2.gameObject.SetActive(false);
             char3.gameObject.SetActive(false);

@@ -205,7 +205,7 @@ public class PlayerController : MonoBehaviour
     }
     private void BeaconReset()
     {
-        this.ScoreAdd = -0.2f;
+        this.ScoreAdd = -0.1f;
         this.SignalIcon.enabled = false;
     }
 
@@ -231,7 +231,7 @@ public class PlayerController : MonoBehaviour
             if (this.Score >= 100)
             {
                 this.Score = 100;
-                GameManager.gameManager.PlayerWin(this.tag);
+                GameManager.gameManager.PlayerWin(this.tag,this.gameObject.GetComponent<SpriteRenderer>().sprite);
             }
 
         }

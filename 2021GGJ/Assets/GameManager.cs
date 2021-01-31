@@ -52,6 +52,14 @@ public class GameManager : MonoBehaviour
     [SerializeField]
     private List<ScoreData> ScoreBoard;
 
+    public GameObject WindZone;
+
+    public GameObject BlackOutZone;
+
+    public List<GameObject> TrapObject;
+
+    public AudioSource SoundEffectControl;
+
 
     private void Awake()
     {
@@ -68,9 +76,11 @@ public class GameManager : MonoBehaviour
         {
             this.TimerImage.fillAmount = 1;
         }
-        
+
         this.TotalTime = this.TimeRemain;
-        this.TimeRemainText.text = this.TimeRemain.ToString("f1")+"S";
+        this.TimeRemainText.text = this.TimeRemain.ToString("f1") + "S";
+        this.WindZone.SetActive(false);
+        this.BlackOutZone.SetActive(false);
     }
 
 
@@ -162,10 +172,28 @@ public class GameManager : MonoBehaviour
         this.BeaconPositionList.Add(LastPos);
         List<BeaconScore> scoreSet = new List<BeaconScore>();
         scoreSet.Add(new BeaconScore { Distance = 100, Score = 0 });
-        scoreSet.Add(new BeaconScore { Distance = 75, Score = UnityEngine.Random.Range(0.2f, 0.3f) });
-        scoreSet.Add(new BeaconScore { Distance = 50, Score = UnityEngine.Random.Range(0.3f, 0.5f) });
-        scoreSet.Add(new BeaconScore { Distance = 25, Score = UnityEngine.Random.Range(0.5f, 0.8f) });
+        scoreSet.Add(new BeaconScore { Distance = 75, Score = UnityEngine.Random.Range(0.3f, 0.5f) });
+        scoreSet.Add(new BeaconScore { Distance = 50, Score = UnityEngine.Random.Range(0.5f, 0.7f) });
+        scoreSet.Add(new BeaconScore { Distance = 25, Score = UnityEngine.Random.Range(0.8f, 1f) });
         this.beacon.SetBeacon(LastPos.position, scoreSet, UnityEngine.Random.Range(8, 15));
+    }
+
+    public void StartTrap(string trap,AudioClip clip)
+    {
+        switch (trap)
+        {
+            case "Wind":
+                this.SoundEffectControl.clip = clip;
+                this.SoundEffectControl.Play();
+                this.WindZone.transform.Rotate(0f, 0f, UnityEngine.Random.Range(0.0f, 360.0f));
+                StartCoroutine(StartTrapCour(this.WindZone, UnityEngine.Random.Range(5, 8)));
+                break;
+            case "BlackOut":
+                this.SoundEffectControl.clip = clip;
+                this.SoundEffectControl.Play();
+                StartCoroutine(StartTrapCour(this.BlackOutZone, UnityEngine.Random.Range(5, 10)));
+                break;
+        }
     }
 
 
@@ -173,7 +201,7 @@ public class GameManager : MonoBehaviour
     {
         ScoreBoard.Add(new ScoreData { PlayerName = PlayerTag, Score = Score });
     }
-    public void PlayerWin(string PlayerName)
+    public void PlayerWin(string PlayerName,Sprite WinnerSprite)
     {
         Time.timeScale = 0;
         this.GameOverPanel.SetActive(true);
@@ -229,6 +257,13 @@ public class GameManager : MonoBehaviour
 
     }
 
+    public void Return_Game()
+    {
+        Time.timeScale = 1;
+        SceneManager.LoadScene("TitleScene");
+
+    }
+
     IEnumerator CountDown()
     {
         yield return new WaitForSeconds(0.1f);
@@ -254,10 +289,32 @@ public class GameManager : MonoBehaviour
             StartCoroutine(CountDown());
             this.StartCountDown.enabled = false;
             TriggerGameStart();
+            StartCoroutine(TrapSpawnCour(UnityEngine.Random.Range(5, 8)));
             yield break;
         }
         yield return new WaitForSeconds(1f);
         StartCoroutine(GameStartCountDown(Counter - 1));
+
+    }
+
+
+    IEnumerator StartTrapCour(GameObject trap, int Time)
+    {
+        trap.SetActive(true);
+        yield return new WaitForSeconds(Time);
+        trap.SetActive(false);
+        this.SoundEffectControl.Stop();
+
+    }
+
+    IEnumerator TrapSpawnCour(int Time)
+    {
+
+        yield return new WaitForSeconds(Time);
+        if (TrapObject.Count > 0)
+            Instantiate(TrapObject[UnityEngine.Random.Range(0, TrapObject.Count)], new Vector2(UnityEngine.Random.Range(-5, 5), UnityEngine.Random.Range(-4, 3.6f)), Quaternion.identity);
+
+        StartCoroutine(TrapSpawnCour(UnityEngine.Random.Range(12, 20)));
 
     }
 }
