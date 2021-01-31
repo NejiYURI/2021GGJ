@@ -58,7 +58,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_Material: {fileID: 0}
-  m_Color: {r: 1, g: 1, b: 1, a: 1}
+  m_Color: {r: 1, g: 0, b: 0, a: 1}
   m_RaycastTarget: 1
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
@@ -443,7 +443,7 @@ Rigidbody2D:
   m_UseFullKinematicContacts: 0
   m_UseAutoMass: 0
   m_Mass: 1
-  m_LinearDrag: 0.1
+  m_LinearDrag: 0.8
   m_AngularDrag: 0.05
   m_GravityScale: 0
   m_Material: {fileID: 6200000, guid: 791dcc1c68db6b84e8757f42944b098a, type: 2}
@@ -466,7 +466,7 @@ MonoBehaviour:
   InputHorizontal: P1Horizontal
   InputVertical: P1Vertical
   InputDash: P1Dash
-  MoveSpeed: 5
+  MoveSpeed: 10
   SpeedPara: 0
   PlayerImage: {fileID: 3190300056205890958}
 --- !u!58 &3190300056205890954

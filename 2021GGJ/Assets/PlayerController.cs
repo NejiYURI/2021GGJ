@@ -271,7 +271,7 @@ public class PlayerController : MonoBehaviour
         this.DashCooldownProgressBar.enabled = true;
         yield return new WaitForSeconds(0.1f);
         DashCounter -= 0.1f;
-        this.DashCooldownProgressBar.fillAmount = 1 - (DashCounter / this.DashCoolDown);
+        this.DashCooldownProgressBar.fillAmount =  (DashCounter / this.DashCoolDown);
 
         if (DashCounter > 0)
         {
